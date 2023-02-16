@@ -5,19 +5,11 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-import requests
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 
-# download the dataset from a remote URL
-# url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00228/smsspamcollection.zip'
-# r = requests.get(url)
-# with open('smsspamcollection.zip', 'wb') as f:
-#     f.write(r.content)
 
-# import zipfile
-# with zipfile.ZipFile('smsspamcollection.zip', 'r') as zip_ref:
-#     zip_ref.extractall()
-
-data = pd.read_csv('smsspamcollection/SMSSpamCollection', sep='\t', header=None)
+data = pd.read_csv('smsspamcollection/SMSSpamCollection.csv', sep='\t', header=None)
 data = data[[0, 1]]
 data.columns = ['label', 'text']
 
@@ -31,6 +23,17 @@ text_features = vectorizer.fit_transform(data['text'])
 # train the classifier on the entire dataset
 clf = MultinomialNB()
 clf.fit(text_features, data['label'])
+
+# predict the labels of the dataset
+pred = clf.predict(text_features)
+
+# calculate the accuracy of the model
+accuracy = accuracy_score(data['label'], pred)
+print('Accuracy:', accuracy)
+
+# create a bar chart to display the number of spam and non-spam messages in the dataset
+data['label'].value_counts().plot(kind='bar', title='Distribution of Spam and Non-Spam Messages')
+plt.show()
 
 # create the UI
 class EmailClassifierUI:
@@ -64,6 +67,7 @@ class EmailClassifierUI:
             self.result_label.config(text='The email is spam.')
         else:
             self.result_label.config(text='The email is not spam.')
+
 
 root = tk.Tk()
 email_classifier_ui = EmailClassifierUI(root)
